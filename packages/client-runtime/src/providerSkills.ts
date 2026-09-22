@@ -123,6 +123,9 @@ export function hasFreshProviderWorkspaceSnapshot(
   cwd: string | null | undefined,
 ): boolean {
   const snapshot = provider && resolveProviderWorkspaceSnapshot(provider, cwd);
+  // Wall clock rather than Effect's `Clock`: this runs in React render paths on
+  // web and mobile, where there is no Effect runtime to read one from. The
+  // server passes its own `Clock` reading to `isWorkspaceSnapshotFresh`.
   // @effect-diagnostics-next-line globalDate:off
   return Boolean(snapshot && isWorkspaceSnapshotFresh(snapshot, Date.now()));
 }
