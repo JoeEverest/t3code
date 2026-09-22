@@ -35,6 +35,7 @@ import {
   checkClaudeProviderStatus,
   makePendingClaudeProvider,
   probeClaudeCapabilities,
+  probeClaudeSlashCommandsForCwd,
 } from "../Layers/ClaudeProvider.ts";
 import { ProviderEventLoggers } from "../Layers/ProviderEventLoggers.ts";
 import { resolveClaudeModelCatalog } from "../ClaudeModelCatalog.ts";
@@ -244,8 +245,13 @@ export const ClaudeDriver: ProviderDriver<ClaudeSettings, ClaudeDriverEnv> = {
           : Effect.all([
               snapshot.getSnapshot,
               discoverClaudeSkills(effectiveConfig, cwd, processEnv),
+              probeClaudeSlashCommandsForCwd(effectiveConfig, cwd, processEnv),
             ]).pipe(
-              Effect.map(([machineSnapshot, skills]) => ({ ...machineSnapshot, skills })),
+              Effect.map(([machineSnapshot, skills, slashCommands]) => ({
+                ...machineSnapshot,
+                skills,
+                ...(slashCommands ? { slashCommands } : {}),
+              })),
               Effect.provideService(FileSystem.FileSystem, fileSystem),
               Effect.provideService(Path.Path, path),
             );
